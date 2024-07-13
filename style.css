@@ -63,18 +63,10 @@
     font-size: 1.1em;
   }
   
-  .limite{
-    position: absolute;
-    width: 640px;
-    height: 480px;
-    outline: 2px solid black;
-  }
-  
-  
   #jogo {
     background-color: transparent;
     width: 640px;
-    height: 480px;
+    height: 481px;
     overflow: hidden;
     position: relative;
   }
@@ -82,7 +74,7 @@
   #jogo.gradiente {
     mask-image: linear-gradient(90deg, transparent 0%, black 58%);
   }
-  
+
   #capaJogo {
     position: absolute;
     margin-left: 21.9em;
