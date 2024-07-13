@@ -87,21 +87,21 @@ section input {
 
 #capaJogo {
   position: absolute;
-  margin-left: 21.9em;
+  margin-left: 21.8em;
   z-index: 3;
   overflow: hidden;
-  transform: skewX(-6deg);
+  transform: skewX(-5.9deg);
   border: solid black;
   background-color: #fff;
   border-width: 0 0.4em 0 0.4em;
-  width: 260px;
+  width: 262px;
   height: 480px;
   display: flex;
   justify-content: center;
 }
 
 #capaJogo img {
-  transform: skewX(6deg);
+  transform: skewX(5.9deg);
   margin-right: 6em;
   cursor: move;
   position: relative;
