@@ -51,7 +51,7 @@ colarCapa.addEventListener("click", () => {
     colarImagem(capaJogo, "auto", "480px", "auto", "480px");
 });
 colarLogo.addEventListener("click", () => {
-    colarImagem(logoJogo, "150px", "auto", "150px", "auto");
+    colarImagem(logoJogo, "180px", "auto", "180px", "auto");
 });
 colarBackground.addEventListener("click", () => {
     colarImagem(backgroundJogo, "auto", "480px", "auto", "480px");
