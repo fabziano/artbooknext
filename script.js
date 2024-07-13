@@ -128,13 +128,16 @@ botaoConverterParaPNG.addEventListener("click", salvarComoPNG);
 function salvarComoPNG() {
     const nomeArquivo = nomeFoto.value.trim() || "Imagem";
     const jogo = document.getElementById("jogo");
-    const rect = jogo.getBoundingClientRect();
+    const jogoHeight = jogo.offsetHeight; // Captura a altura atual do elemento #jogo
 
     domtoimage.toBlob(jogo, {
-        width: rect.width,
-        height: rect.height,
-        left: rect.left,
-        top: rect.top
+        width: jogo.offsetWidth,
+        height: jogoHeight, // Utiliza a altura atual do elemento #jogo
+        style: {
+            transform: "scale(1)", // Manter a escala padrão
+            left: 0, // Posição à esquerda do elemento
+            top: 0 // Posição superior do elemento
+        }
     })
         .then(blob => {
             const link = document.createElement('a');
@@ -146,6 +149,7 @@ function salvarComoPNG() {
             console.error("Erro ao salvar como PNG: ", error);
         });
 }
+
 
 nomeFoto.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
