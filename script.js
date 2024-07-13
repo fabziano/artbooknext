@@ -128,15 +128,15 @@ botaoConverterParaPNG.addEventListener("click", salvarComoPNG);
 function salvarComoPNG() {
     const nomeArquivo = nomeFoto.value.trim() || "Imagem";
     const jogo = document.getElementById("jogo");
-    const jogoHeight = jogo.offsetHeight; // Captura a altura atual do elemento #jogo
+    const jogoHeight = jogo.offsetHeight; 
 
     domtoimage.toBlob(jogo, {
         width: jogo.offsetWidth,
-        height: jogoHeight, // Utiliza a altura atual do elemento #jogo
+        height: jogoHeight, 
         style: {
-            transform: "scale(1)", // Manter a escala padrão
-            left: 0, // Posição à esquerda do elemento
-            top: 0 // Posição superior do elemento
+            transform: "scale(1)", 
+            left: 0, 
+            top: 0 
         }
     })
         .then(blob => {
