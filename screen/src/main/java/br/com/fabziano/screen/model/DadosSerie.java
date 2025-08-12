@@ -1,4 +1,4 @@
-package br.com.fabziano.filmes.model;
+package br.com.fabziano.screen.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -1,4 +1,4 @@
-package br.com.fabziano.filmes.service;
+package br.com.fabziano.screen.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

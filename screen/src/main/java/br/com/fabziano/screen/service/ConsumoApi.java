@@ -1,4 +1,4 @@
-package br.com.fabziano.filmes.service;
+package br.com.fabziano.screen.service;
 
 import java.io.IOException;
 import java.net.URI;
