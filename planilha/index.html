@@ -2,100 +2,13 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Teste Puro de Conexão</title>
+    <title>Gviz</title>
 </head>
 <body>
 
-    <h1>Adicionar Item</h1>
-    <form id="add-item-form">
-        <input type="text" id="item-text" placeholder="Escreva um item" required>
-        <button type="submit">Adicionar</button>
-    </form>
-
-    <hr>
-
-    <h2>Itens da Planilha (Coluna A)</h2>
+    <h1>Itens</h1>
     <ul id="item-list"></ul>
 
-    <script>
-        const SPREADSHEET_ID = '1xwBz5CrQ3es75YkNK2pxoLK8HtG-5I9dnjFpxfudiC8'; 
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsBKs5Ejnq_ESx8AYKeA0ETlu4-5-ASPBIcKH5he77ayg0LPTO5GrqRJ0hXcqHYMAv/exec'; 
-        
-        let itemList = [];
-
-        // --- Funções de Lógica ---
-        async function loadItems() {
-            const gvizUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=Página1&range=A1`;
-            try {
-                const response = await fetch(gvizUrl);
-                const responseText = await response.text();
-                const jsonString = responseText.match(/google\.visualization\.Query\.setResponse\((.*)\)/s)[1];
-                const gvizData = JSON.parse(jsonString);
-                
-                const cellValue = gvizData.table.rows[0]?.c[0]?.v;
-                itemList = cellValue ? JSON.parse(cellValue) : [];
-            } catch (error) {
-                console.log('Planilha provavelmente vazia. Iniciando lista em branco.');
-                itemList = [];
-            }
-            displayItems();
-        }
-
-        async function saveItems() {
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(itemList)
-                });
-            } catch (error) {
-                console.error('Erro ao salvar na planilha:', error);
-                alert('Falha ao salvar. Verifique o console.');
-            }
-        }
-
-        // --- Funções de Interação ---
-        const addItem = (text) => {
-            itemList.push(text);
-            displayItems();
-            saveItems();
-        };
-
-        const deleteItem = (index) => {
-            itemList.splice(index, 1);
-            displayItems();
-            saveItems();
-        };
-
-        // --- Função para Desenhar a Lista na Tela ---
-        const displayItems = () => {
-            const ul = document.getElementById('item-list');
-            ul.innerHTML = '';
-
-            itemList.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Excluir';
-                deleteButton.style.marginLeft = '10px';
-                deleteButton.onclick = () => deleteItem(index);
-                
-                li.appendChild(deleteButton);
-                ul.appendChild(li);
-            });
-        };
-
-        // --- Eventos Iniciais ---
-        document.getElementById('add-item-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('item-text');
-            if (input.value.trim()) {
-                addItem(input.value.trim());
-                input.value = '';
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', loadItems);
-    </script>
+    <script src="leitura.js"></script>
 </body>
 </html>
