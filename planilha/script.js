@@ -1,5 +1,5 @@
 const SPREADSHEET_ID = '1xwBz5CrQ3es75YkNK2pxoLK8HtG-5I9dnjFpxfudiC8';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu8SRDgd51KITpFsbVGFP1oWKwEXDi-blHF29gcdty7j39O-xfgjIo7ei6ttXPuVkj/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEOXdEU_ZubUOHxrG2yVDay_HBmY344JI7mQyonU21K1YSP6DvjxiAuGMmwcwyWV56/exec';
 
 let itemList = [];
 
