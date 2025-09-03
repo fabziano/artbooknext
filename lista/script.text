@@ -1,47 +1,56 @@
-function doGet(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  const data = sheet.getRange("A1").getValue();
-
-  let jsonData;
-  if (data) {
-    jsonData = JSON.parse(data);
-  } else {
-    // Estrutura padrão se a planilha estiver vazia
-    jsonData = {
-      cozinha: { pendente: [], comprado: [] },
-      banheiro: { pendente: [], comprado: [] },
-      quarto: { pendente: [], comprado: [] },
-      sala: { pendente: [], comprado: [] },
-      varanda: { pendente: [], comprado: [] }
-    };
-  }
-  
-  return ContentService
-    .createTextOutput(JSON.stringify(jsonData))
-    .setMimeType(ContentService.MimeType.JSON)
-    .withHeaders({ 'Access-Control-Allow-Origin': '*' });
-}
-
 function doPost(e) {
   try {
-    const data = e.postData.contents;
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Página1');
+    const data = JSON.parse(e.postData.contents);
     
-    // Salva todo o JSON na célula A1
-    sheet.getRange("A1").setValue(data);
+    const roomMapping = {
+      'cozinha': 'A',
+      'banheiro': 'B',
+      'quarto': 'C',
+      'sala': 'D',
+      'varanda': 'E'
+    };
+
+    sheet.getRange("A1:E2").clearContent();
+
+    for (const room in data) {
+      if (roomMapping[room] && data.hasOwnProperty(room)) {
+        const column = roomMapping[room];
+        
+        const pendenteJson = JSON.stringify(data[room].pendente || []);
+        const compradoJson = JSON.stringify(data[room].comprado || []);
+
+        if (pendenteJson !== '[]') {
+          sheet.getRange(column + '1').setValue(pendenteJson);
+        }
+        if (compradoJson !== '[]') {
+          sheet.getRange(column + '2').setValue(compradoJson);
+        }
+      }
+    }
     
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'success' }))
+      .createTextOutput(JSON.stringify({ 'status': 'success' }))
       .setMimeType(ContentService.MimeType.JSON)
       .withHeaders({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type'
       });
-  } catch (error) {
+  } catch (err) {
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'error', message: error.message }))
-      .setMimeType(Content.MimeType.JSON)
+      .createTextOutput(JSON.stringify({ 'status': 'error', 'message': err.message }))
+      .setMimeType(ContentService.MimeType.JSON)
       .withHeaders({ 'Access-Control-Allow-Origin': '*' });
   }
+}
+
+function doOptions(e) {
+  return ContentService
+    .createTextOutput()
+    .withHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
 }
