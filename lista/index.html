@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Enxoval Interativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .tab-active {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        .sub-tab-active {
+            background-color: #fef2e8;
+            color: #9a3412;
+        }
+        .item-list {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .mobile-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">Lista de Enxoval</h1>
+
+        <div class="flex flex-wrap mb-6 space-x-2 md:space-x-4">
+            <button id="cozinha-tab" class="tab px-4 py-2 bg-gray-200 rounded-t-lg hover:bg-gray-300 focus:outline-none tab-active" onclick="showTab('cozinha')">Cozinha</button>
+            <button id="banheiro-tab" class="tab px-4 py-2 bg-gray-200 rounded-t-lg hover:bg-gray-300 focus:outline-none" onclick="showTab('banheiro')">Banheiro</button>
+            <button id="quarto-tab" class="tab px-4 py-2 bg-gray-200 rounded-t-lg hover:bg-gray-300 focus:outline-none" onclick="showTab('quarto')">Quarto</button>
+            <button id="sala-tab" class="tab px-4 py-2 bg-gray-200 rounded-t-lg hover:bg-gray-300 focus:outline-none" onclick="showTab('sala')">Sala</button>
+            <button id="varanda-tab" class="tab px-4 py-2 bg-gray-200 rounded-t-lg hover:bg-gray-300 focus:outline-none" onclick="showTab('varanda')">Varanda</button>
+        </div>
+
+        <div id="sub-tabs" class="flex flex-wrap mb-4 space-x-2 md:space-x-4">
+            <button id="pendente-sub-tab" class="sub-tab px-3 py-1 bg-orange-100 rounded hover:bg-orange-200 focus:outline-none sub-tab-active" onclick="showSubTab('pendente')">A Comprar</button>
+            <button id="comprado-sub-tab" class="sub-tab px-3 py-1 bg-orange-100 rounded hover:bg-orange-200 focus:outline-none" onclick="showSubTab('comprado')">Comprados</button>
+        </div>
+
+        <div id="tab-content">
+            <div id="add-item-section" class="bg-blue-50 p-4 rounded-lg mb-4">
+                <h2 class="text-xl font-semibold mb-3">Adicionar Item ao <span id="current-room">Cozinha</span> (A Comprar)</h2>
+                <form id="add-item-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input type="text" id="item-name" placeholder="Nome do Item" class="border border-gray-300 p-2 rounded" required>
+                    <input type="number" id="item-qty" placeholder="Quantidade" min="1" class="border border-gray-300 p-2 rounded" required>
+                    <input type="number" id="item-price" placeholder="Valor (R$)" step="0.01" min="0" class="border border-gray-300 p-2 rounded" required>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 col-span-1 md:col-span-3">Adicionar Item</button>
+                </form>
+            </div>
+
+            <div class="item-list">
+                <h2 class="text-xl font-semibold mb-3"><span id="current-subtitle">Itens A Comprar</span></h2>
+                <ul id="item-list" class="space-y-2">
+                    </ul>
+                <p id="empty-message" class="text-gray-500 mt-4">Nenhum item nesta categoria ainda.</p>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <div class="inline-block p-4 bg-gray-100 rounded-lg">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/acfeb474-e6a0-4dfd-8832-a3cd742e9aec.png" alt="Detailed isometric illustration of household items arranged by room: pots and kitchen utensils in a bright modular kitchen, towels and toiletries in a tiled bathroom, bed and wardrobe in a cozy bedroom, sofas and table in a spacious living room, and outdoor furniture with PLANT on a terrace varanda, in a clean white background with soft shadows highlighting organization for enxoval checklist" class="w-full max-w-md mx-auto rounded" onerror="this.style.display='none';" />
+                <p class="text-sm text-gray-600 mt-2">Visualização organizada de itens por cômodo para auxiliar no planejamento do enxoval.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SPREADSHEET_ID = '1s2Jl2fmg6ghXEBaKvu4BeAYHGOMoinI26wrq_TG8y1g';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRVyv-tdsvIrY-oEgZ4C6pA2h_6eujuHR0NcwfPcgn3b6QB-BGRjsRpcNE6WZYhojr/exec';
+
+        let enxovalData = {}; 
+        let currentRoom = 'cozinha';
+        let currentSubTab = 'pendente';
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadItems();
+            
+            showTab(currentRoom);
+            showSubTab(currentSubTab);
+
+            document.getElementById('add-item-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addItem();
+            });
+        });
+
+        function showTab(room) {
+            currentRoom = room;
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('tab-active'));
+            document.getElementById(room + '-tab').classList.add('tab-active');
+            document.getElementById('current-room').textContent = room.charAt(0).toUpperCase() + room.slice(1);
+            document.getElementById('sub-tabs').style.display = 'flex';
+            document.getElementById('add-item-form').reset();
+            displayItems(room, currentSubTab);
+        }
+
+        function showSubTab(subTab) {
+            currentSubTab = subTab;
+            document.querySelectorAll('.sub-tab').forEach(stab => stab.classList.remove('sub-tab-active'));
+            document.getElementById(subTab + '-sub-tab').classList.add('sub-tab-active');
+            
+            const subtitle = subTab === 'pendente' ? 'Itens A Comprar' : 'Itens Comprados';
+            document.getElementById('current-subtitle').textContent = subtitle;
+            
+            const addSection = document.getElementById('add-item-section');
+            addSection.style.display = (subTab === 'pendente') ? 'block' : 'none';
+            
+            displayItems(currentRoom, subTab);
+        }
+
+        async function loadItems() {
+            const defaultData = {
+                cozinha: { pendente: [], comprado: [] },
+                banheiro: { pendente: [], comprado: [] },
+                quarto: { pendente: [], comprado: [] },
+                sala: { pendente: [], comprado: [] },
+                varanda: { pendente: [], comprado: [] }
+            };
+
+            const query = encodeURIComponent('SELECT A LIMIT 1');
+            const gvizUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tq=${query}`;
+
+            try {
+                const response = await fetch(gvizUrl);
+                const responseText = await response.text();
+                
+                const jsonString = responseText.match(/google\.visualization\.Query\.setResponse\((.*)\)/s)[1];
+                const gvizData = JSON.parse(jsonString);
+
+                if (gvizData.table.rows.length > 0 && gvizData.table.rows[0].c[0] && gvizData.table.rows[0].c[0].v) {
+                    const storedJson = gvizData.table.rows[0].c[0].v;
+                    enxovalData = JSON.parse(storedJson);
+                } else {
+                    enxovalData = defaultData;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar via gviz:', error);
+                enxovalData = defaultData;
+            }
+        }
+
+        async function saveItems() {
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(enxovalData)
+                });
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+            }
+        }
+
+        async function addItem() {
+            const name = document.getElementById('item-name').value.trim();
+            const qty = parseInt(document.getElementById('item-qty').value);
+            const price = parseFloat(document.getElementById('item-price').value);
+
+            if (name && qty > 0 && price >= 0) {
+                if (!enxovalData[currentRoom]) {
+                    enxovalData[currentRoom] = { pendente: [], comprado: [] };
+                }
+                enxovalData[currentRoom].pendente.push({ name, qty, price, id: Date.now() });
+                await saveItems();
+                displayItems(currentRoom, 'pendente');
+                document.getElementById('add-item-form').reset();
+                if (currentSubTab !== 'pendente') {
+                    showSubTab('pendente');
+                }
+            } else {
+                console.log('Tentativa de adicionar item com campos inválidos.');
+            }
+        }
+
+        function displayItems(room, subTab) {
+            const list = document.getElementById('item-list');
+            const emptyMessage = document.getElementById('empty-message');
+            list.innerHTML = '';
+
+            const items = enxovalData[room] ? enxovalData[room][subTab] : [];
+            if (!items || items.length === 0) {
+                emptyMessage.style.display = 'block';
+                emptyMessage.textContent = subTab === 'pendente' ? 'Nenhum item a comprar ainda.' : 'Nenhum item comprado ainda.';
+                return;
+            }
+            emptyMessage.style.display = 'none';
+
+            items.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.className = 'flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-50 p-4 rounded border';
+                let actionButtons = '';
+
+                if (subTab === 'pendente') {
+                    actionButtons = `
+                        <button onclick="markAsBought('${room}', ${item.id})" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Marcar como Comprado</button>
+                        <button onclick="editItem('${room}', 'pendente', ${item.id})" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Editar</button>
+                        <button onclick="deleteItem('${room}', 'pendente', ${item.id})" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Excluir</button>
+                    `;
+                } else {
+                    actionButtons = `
+                        <button onclick="markAsPending('${room}', ${item.id})" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Voltar para A Comprar</button>
+                        <button onclick="editItem('${room}', 'comprado', ${item.id})" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Editar</button>
+                        <button onclick="deleteItem('${room}', 'comprado', ${item.id})" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Excluir</button>
+                    `;
+                }
+
+                listItem.innerHTML = `
+                    <div class="flex-1">
+                        <strong>${item.name}</strong> - Quantidade: ${item.qty} - Valor: R$ ${item.price.toFixed(2)}
+                    </div>
+                    <div class="flex space-x-2 mt-2 md:mt-0 flex-wrap">
+                        ${actionButtons}
+                    </div>
+                `;
+                list.appendChild(listItem);
+            });
+        }
+
+        function markAsBought(room, id) {
+            moveItem(room, id, 'pendente', 'comprado');
+        }
+
+        function markAsPending(room, id) {
+            moveItem(room, id, 'comprado', 'pendente');
+        }
+
+        async function moveItem(room, id, fromSub, toSub) {
+            const itemIndex = enxovalData[room][fromSub].findIndex(i => i.id === id);
+            if (itemIndex !== -1) {
+                const item = enxovalData[room][fromSub].splice(itemIndex, 1)[0];
+                enxovalData[room][toSub].push(item);
+                await saveItems();
+                displayItems(room, currentSubTab);
+            }
+        }
+
+        async function editItem(room, subTab, id) {
+            const item = enxovalData[room][subTab].find(i => i.id === id);
+            if (item) {
+                const newName = prompt('Novo nome:', item.name);
+                const newQty = parseInt(prompt('Nova quantidade:', item.qty));
+                const newPrice = parseFloat(prompt('Novo valor:', item.price));
+
+                if (newName && newQty > 0 && newPrice >= 0) {
+                    item.name = newName;
+                    item.qty = newQty;
+                    item.price = newPrice;
+                    await saveItems();
+                    displayItems(room, currentSubTab);
+                }
+            }
+        }
+
+        async function deleteItem(room, subTab, id) {
+            enxovalData[room][subTab] = enxovalData[room][subTab].filter(i => i.id !== id);
+            await saveItems();
+            displayItems(room, currentSubTab);
+        }
+    </script>
+</body>
+</html>
