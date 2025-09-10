@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+.trofeu-container {
+    max-width: 900px;
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.trofeu-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.trofeu-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin: auto;
+    object-fit: contain;
+}
+
+.trofeu-info {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.trofeu-info p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.trofeu-info .posicao-destaque {
+    font-size: 1.8em;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #555;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #333;
+}
