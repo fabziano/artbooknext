@@ -12,69 +12,8 @@ main {
     padding:0; 
     width:100%;
 }
-/* LISTA DE EQUIPES */
-aside {
-    min-width: 275px;
-    max-width: 275px;
-    padding: 0.5em;
-    color: #fff;
-    background-color: #24272a;
-}
 
-aside {
-    z-index: 1000;
-    width: 300px;
-    background-color: #24272a;
-    position: absolute;
-    left: 0; 
-    height:fit-content;
-    border-radius: 0 0 0.3em;
-    transition: left 0.3s ease-in-out; /* Transição suave */
-}
-#toggle-aside-btn {
-    z-index: 1001;
-    border:none;
-    border-bottom: 0 0.5em 0 0.5em;
-    position: absolute;
-    color:#fff;
-    background-color: #24272a;
-    cursor: pointer;
-    height:min-content;
-}
 
-.mostrar {
-    left: 0; /* Define para exibir */
-}
-
-.esconder {
-    left: -300px; /* Define para ocultar */
-}
-
-.adicionar{
-    display: flex;
-    flex-direction: column;
-    gap:0.5em;    
-    margin-bottom: 1em;
-}
-.input-box{
-    display: flex;
-    gap: 0.5em;
-    align-items: center;
-    justify-content: center;
-}
-.adicionar-btn{
-    cursor:pointer;
-    color: #fff;
-    background-color: #f4b223;
-    border-radius: 0.2em;
-    border: none;
-    padding: 0.5em;
-    transition: transform ease-in-out 250ms;
-}
-.adicionar-btn:hover{
-    background-color: #f4b223;
-    transform: scale(1.05);
-}
 #nome{
     width: 85%;
     margin-left: 0.5em;
@@ -152,7 +91,6 @@ nav button:hover{
 /* CHAVE */
 section {
     flex: 1;
-    margin-left: 300px;
     min-width: 80%;
 }
 #chave, #repescagem{
