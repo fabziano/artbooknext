@@ -12,10 +12,12 @@ async function buscarCodigoGerado() {
     }
 }
 
-let codigoGerado;
+let codigoGerado = null;
 
 async function iniciarGeracaoPeriodica() {
     codigoGerado = await buscarCodigoGerado();
+    console.log(codigoGerado);
+
     setInterval(async () => {
         codigoGerado = await buscarCodigoGerado();
     }, 15000);
@@ -23,4 +25,8 @@ async function iniciarGeracaoPeriodica() {
 
 iniciarGeracaoPeriodica();
 
-export { codigoGerado };
+function obterCodigoGerado() {
+    return codigoGerado;
+}
+
+export { obterCodigoGerado };
