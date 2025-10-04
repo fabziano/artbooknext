@@ -2,7 +2,7 @@ const form = document.querySelector('form');
 
 const d = {
     async b(ra) {
-        const apiUrl = 'https://fabziano.vercel.app/api/submit-handler';
+        const apiUrl = 'https://aksor.vercel.app/post/submit';
         
         const response = await fetch(apiUrl, {
             method: "POST",
@@ -77,5 +77,6 @@ async function e() {
         a.g(!0); 
     }
 }
+
 
 a.d();
