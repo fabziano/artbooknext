@@ -1,107 +1,153 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <title>Leitor de Código de Barras (Arquivo Único)</title>
+    <title>Leitor QR Code - GitHub Pages</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* Estilos básicos para o container do vídeo */
-        #interactive {
+        body { text-align: center; font-family: sans-serif; }
+        #video-container {
             width: 100%;
-            height: 300px; 
+            max-width: 400px;
+            margin: 10px auto;
             position: relative;
-            /* Oculta a área de visualização até que o botão seja clicado */
-            display: none; 
-            margin-top: 10px;
+            display: none; /* Escondido inicialmente */
         }
-        /* Ajusta o vídeo ao container */
-        #interactive video {
+        #video-container video {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
         }
-        #btnIniciar {
+        #canvas { display: none; } /* O canvas é usado para processar, não para exibir */
+        #btn-iniciar {
             padding: 10px 20px;
             font-size: 16px;
+            margin-bottom: 20px;
         }
     </style>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.4/dist/jsQR.min.js"></script> 
 </head>
 <body>
-    <h1>Controle de Leitura</h1>
+    <h1>Leitor de QR Code</h1>
     
-    <button id="btnIniciar" onclick="iniciarLeitura()">Iniciar Leitura</button>
+    <button id="btn-iniciar" onclick="iniciarScanner()">Iniciar Leitura</button>
     
-    <div id="interactive" class="viewport"></div>
-
+    <div id="video-container">
+        <video id="video" playsinline></video>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    
     <p id="resultado">Código lido: N/A</p>
 
     <script>
-        const interactiveDiv = document.getElementById('interactive');
+        const video = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const canvas = canvasElement.getContext('2d');
         const resultadoElement = document.getElementById('resultado');
-        const btnIniciar = document.getElementById('btnIniciar');
+        const btnIniciar = document.getElementById('btn-iniciar');
+        const videoContainer = document.getElementById('video-container');
 
-        let quaggaInicializado = false;
+        let animationFrameId = null; // Para controlar o loop de leitura
+        let isScanning = false;
 
-        function initQuagga() {
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: interactiveDiv,
-                    constraints: {
-                        width: 640,
-                        height: 480,
-                        facingMode: "environment" // Câmera traseira
-                    }
-                },
-                decoder: {
-                    readers: ["code_128_reader", "ean_reader", "qr_code_reader"] // Tipos de código
-                }
-            }, function(err) {
-                if (err) {
-                    resultadoElement.textContent = 'Erro de inicialização: ' + err.name;
-                    console.error(err);
-                    return;
-                }
-                console.log("QuaggaJS inicializado. Pronto para iniciar.");
-                quaggaInicializado = true;
-            });
+        function desenharBorda(localizacao, cor) {
+            canvas.strokeStyle = cor;
+            canvas.lineWidth = 4;
+            canvas.beginPath();
+            canvas.moveTo(localizacao.topLeftCorner.x, localizacao.topLeftCorner.y);
+            canvas.lineTo(localizacao.topRightCorner.x, localizacao.topRightCorner.y);
+            canvas.lineTo(localizacao.bottomRightCorner.x, localizacao.bottomRightCorner.y);
+            canvas.lineTo(localizacao.bottomLeftCorner.x, localizacao.bottomLeftCorner.y);
+            canvas.lineTo(localizacao.topLeftCorner.x, localizacao.topLeftCorner.y);
+            canvas.stroke();
         }
 
-        function iniciarLeitura() {
-            if (!quaggaInicializado) {
-                resultadoElement.textContent = 'Aguarde a inicialização...';
-                return;
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                // Ajusta o tamanho do canvas para o tamanho do vídeo
+                canvasElement.height = video.videoHeight;
+                canvasElement.width = video.videoWidth;
+                
+                // Desenha o frame atual do vídeo no canvas
+                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                
+                // Obtém os dados da imagem (necessário para o jsQR)
+                const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                
+                // Tenta decodificar o QR Code
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+                if (code) {
+                    // Código encontrado!
+                    desenharBorda(code.location, "#FF0000"); // Desenha a borda em vermelho
+                    resultadoElement.textContent = 'Código lido: ' + code.data;
+                    pararScanner(code.data); // Para a leitura
+                    return; // Sai do loop
+                }
             }
-            
-            // 1. Mostrar a área do vídeo
-            interactiveDiv.style.display = 'block';
-            btnIniciar.textContent = 'Lendo...';
-            btnIniciar.disabled = true;
 
-            // 2. Iniciar o processo de leitura (liga a câmera)
-            Quagga.start();
-            resultadoElement.textContent = 'Câmera ligada. Aponte para o código...';
+            // Continua o loop de animação
+            animationFrameId = requestAnimationFrame(tick);
         }
 
-        // Evento disparado quando um código é detectado com sucesso
-        Quagga.onDetected(function(data) {
-            // 1. Parar a câmera e a leitura
-            Quagga.stop(); 
+        function iniciarScanner() {
+            if (isScanning) return;
             
-            const codigoLido = data.codeResult.code;
-            resultadoElement.textContent = 'Código lido: ' + codigoLido;
+            // 1. Configura as restrições (forcing environment - câmera traseira)
+            const constraints = {
+                video: {
+                    facingMode: "environment" 
+                }
+            };
             
-            // 2. Ocultar o vídeo e reativar o botão
-            interactiveDiv.style.display = 'none';
+            // 2. Solicita acesso à câmera
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.setAttribute("playsinline", true); // Necessário para iOS
+                    video.play();
+                    
+                    // Mostra o container do vídeo e altera o botão
+                    videoContainer.style.display = 'block';
+                    btnIniciar.textContent = 'Aguardando QR Code...';
+                    btnIniciar.disabled = true;
+                    resultadoElement.textContent = 'Aponte a câmera traseira para um QR Code.';
+                    
+                    isScanning = true;
+                    // 3. Inicia o loop de leitura
+                    animationFrameId = requestAnimationFrame(tick);
+                })
+                .catch(function(err) {
+                    resultadoElement.textContent = 'ERRO! Acesso à câmera negado ou indisponível. Detalhe: ' + err.name;
+                    console.error('Erro ao iniciar o scanner:', err);
+                });
+        }
+
+        function pararScanner(codigoLido) {
+            cancelAnimationFrame(animationFrameId); // Para o loop
+            isScanning = false;
+            
+            // Para a stream da câmera
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+
+            // Oculta o container e reinicia o botão
+            videoContainer.style.display = 'none';
             btnIniciar.textContent = 'Iniciar Nova Leitura';
             btnIniciar.disabled = false;
-        });
+            
+            alert('Código Lido: ' + codigoLido);
+        }
 
-        // Inicializa o QuaggaJS quando a página carrega, mas não liga a câmera
-        document.addEventListener('DOMContentLoaded', initQuagga);
+        // Garante que o botão de início esteja visível ao carregar
+        document.addEventListener('DOMContentLoaded', () => {
+             btnIniciar.textContent = 'Iniciar Leitura';
+             resultadoElement.textContent = 'Pronto para escanear.';
+        });
     </script>
 </body>
 </html>
