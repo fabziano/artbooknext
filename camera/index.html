@@ -7,17 +7,19 @@
     <style>
         body { text-align: center; font-family: sans-serif; }
         #video-container {
-            width: 100%;
+            width: 90%; 
             max-width: 400px;
             margin: 10px auto;
             position: relative;
-            display: none; /* Escondido inicialmente */
+            display: none; 
+            border: 2px solid #000; 
         }
         #video-container video {
             width: 100%;
             height: auto;
+            display: block; 
         }
-        #canvas { display: none; } /* O canvas é usado para processar, não para exibir */
+        #canvas { display: none; } 
         #btn-iniciar {
             padding: 10px 20px;
             font-size: 16px;
@@ -48,10 +50,11 @@
         const btnIniciar = document.getElementById('btn-iniciar');
         const videoContainer = document.getElementById('video-container');
 
-        let animationFrameId = null; // Para controlar o loop de leitura
+        let animationFrameId = null;
         let isScanning = false;
 
         function desenharBorda(localizacao, cor) {
+            // ... (Função de desenho de borda)
             canvas.strokeStyle = cor;
             canvas.lineWidth = 4;
             canvas.beginPath();
@@ -64,6 +67,8 @@
         }
 
         function tick() {
+            if (!isScanning) return; // Garante que o loop só roda se estiver escaneando
+
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 // Ajusta o tamanho do canvas para o tamanho do vídeo
                 canvasElement.height = video.videoHeight;
@@ -72,70 +77,81 @@
                 // Desenha o frame atual do vídeo no canvas
                 canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
                 
-                // Obtém os dados da imagem (necessário para o jsQR)
                 const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
                 
-                // Tenta decodificar o QR Code
                 const code = jsQR(imageData.data, imageData.width, imageData.height, {
                     inversionAttempts: "dontInvert",
                 });
 
                 if (code) {
-                    // Código encontrado!
-                    desenharBorda(code.location, "#FF0000"); // Desenha a borda em vermelho
+                    desenharBorda(code.location, "#FF0000"); 
                     resultadoElement.textContent = 'Código lido: ' + code.data;
-                    pararScanner(code.data); // Para a leitura
-                    return; // Sai do loop
+                    pararScanner(code.data); 
+                    return; 
                 }
             }
-
-            // Continua o loop de animação
             animationFrameId = requestAnimationFrame(tick);
         }
 
         function iniciarScanner() {
             if (isScanning) return;
             
-            // 1. Configura as restrições (forcing environment - câmera traseira)
+            // Desativa o botão IMEDIATAMENTE após o clique
+            btnIniciar.textContent = 'Aguardando Permissão...';
+            btnIniciar.disabled = true;
+
+            // Restrições: Câmera traseira com resolução preferencial
             const constraints = {
                 video: {
-                    facingMode: "environment" 
+                    facingMode: "environment", 
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 }
             };
             
-            // 2. Solicita acesso à câmera
+            // O request da câmera é o que dispara a caixa de diálogo de permissão
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(function(stream) {
                     video.srcObject = stream;
-                    video.setAttribute("playsinline", true); // Necessário para iOS
-                    video.play();
+                    video.setAttribute("playsinline", true);
                     
-                    // Mostra o container do vídeo e altera o botão
-                    videoContainer.style.display = 'block';
-                    btnIniciar.textContent = 'Aguardando QR Code...';
-                    btnIniciar.disabled = true;
-                    resultadoElement.textContent = 'Aponte a câmera traseira para um QR Code.';
-                    
-                    isScanning = true;
-                    // 3. Inicia o loop de leitura
-                    animationFrameId = requestAnimationFrame(tick);
+                    video.onloadedmetadata = function() {
+                        video.play();
+                        
+                        videoContainer.style.display = 'block';
+                        btnIniciar.textContent = 'Aguardando QR Code...';
+                        resultadoElement.textContent = 'Aponte a câmera traseira para um QR Code.';
+                        
+                        isScanning = true;
+                        animationFrameId = requestAnimationFrame(tick);
+                    };
                 })
                 .catch(function(err) {
-                    resultadoElement.textContent = 'ERRO! Acesso à câmera negado ou indisponível. Detalhe: ' + err.name;
+                    // Trata os erros e reativa o botão para uma nova tentativa
+                    btnIniciar.textContent = 'Iniciar Leitura';
+                    btnIniciar.disabled = false;
+
+                    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                        resultadoElement.textContent = 'ERRO: Acesso à câmera negado pelo usuário ou sistema.';
+                    } else if (err.name === 'NotFoundError') {
+                         resultadoElement.textContent = 'ERRO: Nenhuma câmera traseira encontrada no dispositivo.';
+                    } else {
+                        resultadoElement.textContent = 'ERRO: Falha ao iniciar câmera. Detalhe: ' + err.name;
+                    }
                     console.error('Erro ao iniciar o scanner:', err);
                 });
         }
 
         function pararScanner(codigoLido) {
-            cancelAnimationFrame(animationFrameId); // Para o loop
             isScanning = false;
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
             
-            // Para a stream da câmera
             if (video.srcObject) {
                 video.srcObject.getTracks().forEach(track => track.stop());
             }
 
-            // Oculta o container e reinicia o botão
             videoContainer.style.display = 'none';
             btnIniciar.textContent = 'Iniciar Nova Leitura';
             btnIniciar.disabled = false;
@@ -143,7 +159,7 @@
             alert('Código Lido: ' + codigoLido);
         }
 
-        // Garante que o botão de início esteja visível ao carregar
+        // Garante que o estado inicial é limpo
         document.addEventListener('DOMContentLoaded', () => {
              btnIniciar.textContent = 'Iniciar Leitura';
              resultadoElement.textContent = 'Pronto para escanear.';
