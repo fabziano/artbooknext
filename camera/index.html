@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        *{
+           margin: 0; 
+           padding: 0;  
+           box-sizing: border-box;
+        }
         html, body {
             margin: 0; 
             padding: 0;
@@ -57,6 +62,7 @@
             padding: 10px 20px;
             font-size: 16px;
             margin: 5px;
+            cursor: pointer;
         }
         
         #btn-desligar {
@@ -117,25 +123,31 @@
         let isScanning = false;
         let videoTrack = null;
         
-        async function carregarDados() {
-            try {
-                const response = await fetch('dados.json');
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP! Status: ${response.status}`);
+        function carregarDados() {
+            const data = {
+                "STATUS_PAGAMENTO": {
+                    "504756": { "pago": true, "nome": "Alessandro Rodrigues", "placa": "ABC-1234", "modelo": "Ford Ka", "cor": "Prata" },
+                    "505614": { "pago": false, "nome": "Allan Marcos", "placa": "XYZ-9876", "modelo": "Fiat Uno", "cor": "Vermelho" },
+                    "504964": { "pago": true, "nome": "Amira Hicham", "placa": "MNO-4567", "modelo": "VW Gol", "cor": "Preto" },
+                    "503908": { "pago": false, "nome": "Andre Gabriel", "placa": "DEF-3456", "modelo": "Chevrolet Onix", "cor": "Branco" },
+                    "504650": { "pago": true, "nome": "Andre Mai", "placa": "GHI-6789", "modelo": "Renault Kwid", "cor": "Azul" },
+                    "504040": { "pago": true, "nome": "Andrei Gregori", "placa": "JKL-0123", "modelo": "Toyota Corolla", "cor": "Cinza" },
+                    "504220": { "pago": true, "nome": "Anthony Gabriel", "placa": "PQR-7890", "modelo": "Honda Civic", "cor": "Prata" },
+                    "504652": { "pago": false, "nome": "Arthur Henrique", "placa": "STU-1122", "modelo": "Hyundai HB20", "cor": "Vermelho" },
+                    "504800": { "pago": true, "nome": "Ary de Souza", "placa": "VWA-3344", "modelo": "Jeep Renegade", "cor": "Verde" },
+                    "504381": { "pago": false, "nome": "Augusto Leão", "placa": "BCA-5566", "modelo": "BMW X1", "cor": "Preto" },
+                    "505233": { "pago": true, "nome": "Beatriz Schindler", "placa": "CDB-7788", "modelo": "Nissan Kicks", "cor": "Azul" },
+                    "505727": { "pago": false, "nome": "Bianca Pastega", "placa": "DEC-9900", "modelo": "VW T-Cross", "cor": "Branco" },
+                    "503879": { "pago": true, "nome": "Bouchra Assad", "placa": "EFD-1100", "modelo": "Mercedes C180", "cor": "Prata" },
+                    "504596": { "pago": true, "nome": "Bruno Vieira", "placa": "FGE-2211", "modelo": "Ford Focus", "cor": "Cinza" }
                 }
-                const data = await response.json();
-                
-                STATUS_PAGAMENTO = data.STATUS_PAGAMENTO;
-                
-                btnIniciar.textContent = 'Iniciar Leitura';
-                btnIniciar.disabled = false;
-                resultadoElement.textContent = 'Pronto para escanear.';
-
-            } catch (error) {
-                console.error('Falha ao carregar dados.json:', error);
-                resultadoElement.textContent = 'ERRO: Falha ao carregar dados do estacionamento.';
-                resultadoElement.style.color = '#9f4c4c';
-            }
+            };
+            
+            STATUS_PAGAMENTO = data.STATUS_PAGAMENTO;
+            
+            btnIniciar.textContent = 'Iniciar Leitura';
+            btnIniciar.disabled = false;
+            resultadoElement.textContent = 'Pronto para escanear.';
         }
 
         function verificarPagamento(codigoLido) {
@@ -151,12 +163,12 @@
                 iconeStatusDiv.innerHTML = svgPago;
                 resultadoElement.textContent = `Acesso Liberado!`;
                 resultadoElement.style.color = '#699f4c';
-                detalhesCarroP.innerHTML = `<p>Nome: ${status.nome}</p><p>Placa: ${status.placa}</p><p>Modelo: ${status.modelo}</p> <p>Cor: ${status.cor}</p>`;
+                detalhesCarroP.innerHTML = `<p>Nome: ${status.nome}</p><p>Placa: ${status.placa}</p><p>Marca/Modelo: ${status.modelo}</p> <p>Cor: ${status.cor}</p>`;
             } else {
                 iconeStatusDiv.innerHTML = svgNaoPago;
                 resultadoElement.textContent = `PAGAMENTO PENDENTE!`;
                 resultadoElement.style.color = '#9f4c4c';
-                detalhesCarroP.innerHTML = `<p>Nome: ${status.nome}</p><p>Placa: ${status.placa}</p><p>Modelo: ${status.modelo}</p> <p>Cor: ${status.cor}</p>`;
+                detalhesCarroP.innerHTML = `<p>Nome: ${status.nome}</p><p>Placa: ${status.placa}</p><p>Marca/Modelo: ${status.modelo}</p> <p>Cor: ${status.cor}</p>`;
             }
         }
 
