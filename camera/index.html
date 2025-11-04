@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <title>Leitor QR Code com Controle</title>
+    <title>Leitor QR Code Final</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -19,18 +19,28 @@
             min-height: 100vh;
         }
         
+        /* Container do Preview Quadrado (Aspect Ratio 1:1) */
         #video-container {
-            width: 90%;
+            width: 90%; 
             max-width: 400px;
             margin: 10px auto;
             position: relative;
             display: none; 
             border: 2px solid #000;
+            
+            /* Truque CSS para forçar aspect ratio 1:1 */
+            padding-top: 90%; 
+            height: 0;
+            overflow: hidden;
         }
         
         #video-container video {
+            position: absolute; /* Permite que o vídeo se posicione dentro do padding-top */
+            top: 0;
+            left: 0;
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover; /* Faz o vídeo preencher o quadrado sem distorcer */
             display: block; 
         }
         
@@ -61,7 +71,7 @@
     
     <div id="controles">
         <button id="btn-iniciar" onclick="iniciarScanner()">Iniciar Leitura</button>
-        <button id="btn-desligar" onclick="pararScannerManual()" disabled>Desligar Câmera</button>
+        <button id="btn-desligar" onclick="pararScannerManual()" style="display: none;">Desligar Câmera</button>
     </div>
     
     <div id="video-container">
@@ -139,7 +149,7 @@
                 if (code) {
                     desenharBorda(code.location, "#FF0000"); 
                     resultadoElement.textContent = 'Código lido: ' + code.data;
-                    pararScanner(code.data); 
+                    pararScanner(code.data); // Desliga a câmera e reativa os botões
                     return; 
                 }
             }
@@ -173,7 +183,8 @@
                         toggleFlash(true); 
                         
                         videoContainer.style.display = 'block';
-                        btnIniciar.style.display = 'none';
+                        btnIniciar.style.display = 'none'; // Oculta o Iniciar
+                        btnDesligar.style.display = 'inline-block'; // Mostra o Desligar
                         btnDesligar.disabled = false;
                         resultadoElement.textContent = 'Aponte a câmera traseira para um QR Code.';
                         
@@ -209,9 +220,10 @@
             }
 
             videoContainer.style.display = 'none';
-            btnIniciar.style.display = 'inline-block';
-            btnIniciar.textContent = 'Iniciar Nova Leitura';
-            btnDesligar.disabled = true;
+            btnIniciar.style.display = 'inline-block'; // Mostra o Iniciar
+            btnIniciar.textContent = 'Iniciar Nova Leitura'; // Atualiza o texto
+            btnIniciar.disabled = false;
+            btnDesligar.style.display = 'none'; // Oculta o Desligar
             
             console.log('QR Code Lido: ' + codigoLido);
             videoTrack = null;
