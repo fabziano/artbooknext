@@ -108,13 +108,14 @@
         let STATUS_PAGAMENTO = {};
         let svgPago = '';
         let svgNaoPago = '';
+        let svgNaoEncontrado = ''; // Variável para o novo SVG
 
         let animationFrameId = null;
         let isScanning = false;
         let videoTrack = null;
         
         // ====================================================================
-        // FUNÇÃO DE CARREGAMENTO DE DADOS (NOVA)
+        // FUNÇÃO DE CARREGAMENTO DE DADOS
         // ====================================================================
 
         async function carregarDados() {
@@ -128,8 +129,8 @@
                 STATUS_PAGAMENTO = data.STATUS_PAGAMENTO;
                 svgPago = data.SVGPAGO;
                 svgNaoPago = data.SVGNOPAGO;
+                svgNaoEncontrado = data.SVGNAOENCONTRADO; // Carrega o novo SVG
                 
-                // Dados carregados com sucesso
                 btnIniciar.textContent = 'Iniciar Leitura';
                 btnIniciar.disabled = false;
                 resultadoElement.textContent = 'Pronto para escanear.';
@@ -150,16 +151,16 @@
             
             detalhesCarroP.innerHTML = "";
             
-            if (!status) {
-                iconeStatusDiv.innerHTML = svgNaoPago;
-                resultadoElement.textContent = `ERRO: Código '${codigoLido}' não encontrado na lista.`;
-                resultadoElement.style.color = '#9f4c4c';
+            if (!status) { // Código não encontrado
+                iconeStatusDiv.innerHTML = svgNaoEncontrado; // Usa o novo SVG
+                resultadoElement.textContent = `Código '${codigoLido}' não encontrado na lista.`;
+                resultadoElement.style.color = '#bf873e'; // Cor laranja/amarela para atenção
             } else if (status.pago) {
                 iconeStatusDiv.innerHTML = svgPago;
                 resultadoElement.textContent = `Acesso Liberado! (${status.nome})`;
                 resultadoElement.style.color = '#699f4c';
                 detalhesCarroP.innerHTML = `**Placa:** ${status.placa} | **Modelo:** ${status.modelo} | **Cor:** ${status.cor}`;
-            } else {
+            } else { // Não pago
                 iconeStatusDiv.innerHTML = svgNaoPago;
                 resultadoElement.textContent = `PAGAMENTO PENDENTE! Acesso Negado. (${status.nome})`;
                 resultadoElement.style.color = '#9f4c4c';
@@ -216,7 +217,6 @@
         function iniciarScanner() {
             if (isScanning || btnIniciar.disabled) return;
             
-            // Limpa o estado
             iconeStatusDiv.innerHTML = "";
             detalhesCarroP.innerHTML = "";
             resultadoElement.textContent = 'Aguardando Permissão...';
@@ -291,6 +291,7 @@
             pararScanner('Manual');
             resultadoElement.textContent = 'Pronto para escanear.';
             resultadoElement.style.color = '#333';
+            iconeStatusDiv.innerHTML = ''; // Limpa o ícone
         }
 
         // Inicia o carregamento dos dados ao carregar a página
