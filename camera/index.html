@@ -19,25 +19,31 @@
             min-height: 100vh;
         }
         
+        #icone-status {
+            width: 150px; 
+            height: 150px;
+            margin: 20px auto;
+        }
+
         #video-container {
             width: 90%; 
             max-width: 400px;
             margin: 10px auto;
             position: relative;
             display: none; 
-            border: 2px solid #000;           
+            border: 2px solid #000;
             padding-top: 90%; 
             height: 0;
             overflow: hidden;
         }
         
         #video-container video {
-            position: absolute; 
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; 
+            object-fit: cover;
             display: block; 
         }
         
@@ -49,29 +55,32 @@
 
         #btn-iniciar, #btn-desligar {
             padding: 10px 20px;
-            border-radius: .5rem;
-            border: none;
-            background-color: #111;
-            color: #fff;
             font-size: 16px;
-            cursor: pointer;
             margin: 5px;
         }
         
         #btn-desligar {
             background-color: #f44336;
-            border-radius: .5rem;
             color: white;
             border: none;
             cursor: pointer;
+        }
+        
+        #detalhes-carro {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            min-height: 50px;
         }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.4/dist/jsQR.min.js"></script> 
 </head>
-<body>   
+<body>
+    <h1>Leitor Estacionamento</h1>
+    
     <div id="controles">
-        <button id="btn-iniciar" onclick="iniciarScanner()">Iniciar Leitura</button>
+        <button id="btn-iniciar" onclick="iniciarScanner()" disabled>Aguardando Dados...</button>
         <button id="btn-desligar" onclick="pararScannerManual()" style="display: none;">Desligar Câmera</button>
     </div>
     
@@ -81,7 +90,9 @@
     
     <canvas id="canvas"></canvas>
     
-    <p id="resultado">Código lido: N/A</p>
+    <div id="icone-status"></div>
+    <p id="resultado">Carregando dados...</p>
+    <p id="detalhes-carro"></p>
 
     <script>
         const video = document.getElementById('video');
@@ -91,10 +102,70 @@
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnDesligar = document.getElementById('btn-desligar');
         const videoContainer = document.getElementById('video-container');
+        const iconeStatusDiv = document.getElementById('icone-status');
+        const detalhesCarroP = document.getElementById('detalhes-carro');
+        
+        let STATUS_PAGAMENTO = {};
+        let svgPago = '';
+        let svgNaoPago = '';
 
         let animationFrameId = null;
         let isScanning = false;
         let videoTrack = null;
+        
+        // ====================================================================
+        // FUNÇÃO DE CARREGAMENTO DE DADOS (NOVA)
+        // ====================================================================
+
+        async function carregarDados() {
+            try {
+                const response = await fetch('dados.json');
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                STATUS_PAGAMENTO = data.STATUS_PAGAMENTO;
+                svgPago = data.SVGPAGO;
+                svgNaoPago = data.SVGNOPAGO;
+                
+                // Dados carregados com sucesso
+                btnIniciar.textContent = 'Iniciar Leitura';
+                btnIniciar.disabled = false;
+                resultadoElement.textContent = 'Pronto para escanear.';
+
+            } catch (error) {
+                console.error('Falha ao carregar dados.json:', error);
+                resultadoElement.textContent = 'ERRO: Falha ao carregar dados do estacionamento.';
+                resultadoElement.style.color = '#9f4c4c';
+            }
+        }
+
+        // ====================================================================
+        // LÓGICA DE NEGÓCIO E SCANNER
+        // ====================================================================
+
+        function verificarPagamento(codigoLido) {
+            const status = STATUS_PAGAMENTO[codigoLido];
+            
+            detalhesCarroP.innerHTML = "";
+            
+            if (!status) {
+                iconeStatusDiv.innerHTML = svgNaoPago;
+                resultadoElement.textContent = `ERRO: Código '${codigoLido}' não encontrado na lista.`;
+                resultadoElement.style.color = '#9f4c4c';
+            } else if (status.pago) {
+                iconeStatusDiv.innerHTML = svgPago;
+                resultadoElement.textContent = `Acesso Liberado! (${status.nome})`;
+                resultadoElement.style.color = '#699f4c';
+                detalhesCarroP.innerHTML = `**Placa:** ${status.placa} | **Modelo:** ${status.modelo} | **Cor:** ${status.cor}`;
+            } else {
+                iconeStatusDiv.innerHTML = svgNaoPago;
+                resultadoElement.textContent = `PAGAMENTO PENDENTE! Acesso Negado. (${status.nome})`;
+                resultadoElement.style.color = '#9f4c4c';
+                detalhesCarroP.innerHTML = `**Placa:** ${status.placa} | **Modelo:** ${status.modelo} | **Cor:** ${status.cor}`;
+            }
+        }
 
         function desenharBorda(localizacao, cor) {
             canvas.strokeStyle = cor;
@@ -110,47 +181,32 @@
         
         function toggleFlash(state) {
             if (!videoTrack) return;
-
             const capabilities = videoTrack.getCapabilities();
-
             if (!capabilities.torch) {
-                console.warn('Controle de Flash (Torch) não suportado.');
                 return;
             }
-
             videoTrack.applyConstraints({
-                advanced: [{
-                    torch: state 
-                }]
-            })
-            .then(() => {
-                console.log('Flash configurado para: ' + state);
-            })
-            .catch(err => {
+                advanced: [{ torch: state }]
+            }).catch(err => {
                 console.error('Erro ao controlar o Flash:', err);
             });
         }
 
-
         function tick() {
             if (!isScanning) return;
-
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 canvasElement.height = video.videoHeight;
                 canvasElement.width = video.videoWidth;
-                
                 canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-                
                 const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                
                 const code = jsQR(imageData.data, imageData.width, imageData.height, {
                     inversionAttempts: "dontInvert",
                 });
 
                 if (code) {
                     desenharBorda(code.location, "#FF0000"); 
-                    resultadoElement.textContent = 'Código lido: ' + code.data;
-                    pararScanner(code.data);
+                    verificarPagamento(code.data);
+                    pararScanner(code.data); 
                     return; 
                 }
             }
@@ -158,9 +214,13 @@
         }
 
         function iniciarScanner() {
-            if (isScanning) return;
+            if (isScanning || btnIniciar.disabled) return;
             
-            btnIniciar.textContent = 'Aguardando Permissão...';
+            // Limpa o estado
+            iconeStatusDiv.innerHTML = "";
+            detalhesCarroP.innerHTML = "";
+            resultadoElement.textContent = 'Aguardando Permissão...';
+            resultadoElement.style.color = '#333';
             btnIniciar.disabled = true;
 
             const constraints = {
@@ -174,7 +234,6 @@
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(function(stream) {
                     videoTrack = stream.getVideoTracks()[0];
-                    
                     video.srcObject = stream;
                     video.setAttribute("playsinline", true);
                     
@@ -184,10 +243,10 @@
                         toggleFlash(true); 
                         
                         videoContainer.style.display = 'block';
-                        btnIniciar.style.display = 'none'; 
-                        btnDesligar.style.display = 'inline-block'; 
+                        btnIniciar.style.display = 'none';
+                        btnDesligar.style.display = 'inline-block';
                         btnDesligar.disabled = false;
-                        resultadoElement.textContent = 'Aponte a câmera para o QR Code.';
+                        resultadoElement.textContent = 'Aponte a câmera traseira para o QR Code.';
                         
                         isScanning = true;
                         animationFrameId = requestAnimationFrame(tick);
@@ -198,9 +257,7 @@
                     btnIniciar.disabled = false;
 
                     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                        resultadoElement.textContent = 'ERRO: Acesso à câmera negado pelo usuário ou sistema.';
-                    } else if (err.name === 'NotFoundError') {
-                         resultadoElement.textContent = 'ERRO: Nenhuma câmera traseira encontrada no dispositivo.';
+                        resultadoElement.textContent = 'ERRO: Acesso à câmera negado. (Permissão de sistema)';
                     } else {
                         resultadoElement.textContent = 'ERRO: Falha ao iniciar câmera. Detalhe: ' + err.name;
                     }
@@ -222,24 +279,22 @@
 
             videoContainer.style.display = 'none';
             btnIniciar.style.display = 'inline-block';
-            btnIniciar.textContent = 'Iniciar Nova Leitura'; 
+            btnIniciar.textContent = 'Iniciar Nova Leitura';
             btnIniciar.disabled = false;
-            btnDesligar.style.display = 'none'; 
+            btnDesligar.style.display = 'none';
             
-            console.log('QR Code Lido: ' + codigoLido);
+            console.log('Leitura finalizada. Código: ' + codigoLido);
             videoTrack = null;
         }
         
         function pararScannerManual() {
-            pararScanner('Câmera Desligada Manualmente.');
-            resultadoElement.textContent = '';
+            pararScanner('Manual');
+            resultadoElement.textContent = 'Pronto para escanear.';
+            resultadoElement.style.color = '#333';
         }
 
-
-        document.addEventListener('DOMContentLoaded', () => {
-             btnIniciar.textContent = 'Iniciar Leitura';
-             resultadoElement.textContent = '';
-        });
+        // Inicia o carregamento dos dados ao carregar a página
+        document.addEventListener('DOMContentLoaded', carregarDados);
     </script>
 </body>
 </html>
