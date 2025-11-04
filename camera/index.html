@@ -16,7 +16,7 @@
         }
         #video-container video {
             width: 100%;
-            height: auto;
+            height: 400;
             display: block; 
         }
         #canvas { display: none; } 
@@ -54,7 +54,6 @@
         let isScanning = false;
 
         function desenharBorda(localizacao, cor) {
-            // ... (Função de desenho de borda)
             canvas.strokeStyle = cor;
             canvas.lineWidth = 4;
             canvas.beginPath();
@@ -67,14 +66,12 @@
         }
 
         function tick() {
-            if (!isScanning) return; // Garante que o loop só roda se estiver escaneando
+            if (!isScanning) return; 
 
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                // Ajusta o tamanho do canvas para o tamanho do vídeo
                 canvasElement.height = video.videoHeight;
                 canvasElement.width = video.videoWidth;
                 
-                // Desenha o frame atual do vídeo no canvas
                 canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
                 
                 const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
@@ -96,11 +93,9 @@
         function iniciarScanner() {
             if (isScanning) return;
             
-            // Desativa o botão IMEDIATAMENTE após o clique
             btnIniciar.textContent = 'Aguardando Permissão...';
             btnIniciar.disabled = true;
 
-            // Restrições: Câmera traseira com resolução preferencial
             const constraints = {
                 video: {
                     facingMode: "environment", 
@@ -109,7 +104,6 @@
                 }
             };
             
-            // O request da câmera é o que dispara a caixa de diálogo de permissão
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(function(stream) {
                     video.srcObject = stream;
@@ -127,7 +121,6 @@
                     };
                 })
                 .catch(function(err) {
-                    // Trata os erros e reativa o botão para uma nova tentativa
                     btnIniciar.textContent = 'Iniciar Leitura';
                     btnIniciar.disabled = false;
 
@@ -159,7 +152,6 @@
             alert('Código Lido: ' + codigoLido);
         }
 
-        // Garante que o estado inicial é limpo
         document.addEventListener('DOMContentLoaded', () => {
              btnIniciar.textContent = 'Iniciar Leitura';
              resultadoElement.textContent = 'Pronto para escanear.';
