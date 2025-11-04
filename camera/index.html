@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Leitor de Código de Barras (Arquivo Único)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilos básicos para o container do vídeo */
+        #interactive {
+            width: 100%;
+            height: 300px; 
+            position: relative;
+            /* Oculta a área de visualização até que o botão seja clicado */
+            display: none; 
+            margin-top: 10px;
+        }
+        /* Ajusta o vídeo ao container */
+        #interactive video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #btnIniciar {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script> 
+</head>
+<body>
+    <h1>Controle de Leitura</h1>
+    
+    <button id="btnIniciar" onclick="iniciarLeitura()">Iniciar Leitura</button>
+    
+    <div id="interactive" class="viewport"></div>
+
+    <p id="resultado">Código lido: N/A</p>
+
+    <script>
+        const interactiveDiv = document.getElementById('interactive');
+        const resultadoElement = document.getElementById('resultado');
+        const btnIniciar = document.getElementById('btnIniciar');
+
+        let quaggaInicializado = false;
+
+        function initQuagga() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: interactiveDiv,
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment" // Câmera traseira
+                    }
+                },
+                decoder: {
+                    readers: ["code_128_reader", "ean_reader", "qr_code_reader"] // Tipos de código
+                }
+            }, function(err) {
+                if (err) {
+                    resultadoElement.textContent = 'Erro de inicialização: ' + err.name;
+                    console.error(err);
+                    return;
+                }
+                console.log("QuaggaJS inicializado. Pronto para iniciar.");
+                quaggaInicializado = true;
+            });
+        }
+
+        function iniciarLeitura() {
+            if (!quaggaInicializado) {
+                resultadoElement.textContent = 'Aguarde a inicialização...';
+                return;
+            }
+            
+            // 1. Mostrar a área do vídeo
+            interactiveDiv.style.display = 'block';
+            btnIniciar.textContent = 'Lendo...';
+            btnIniciar.disabled = true;
+
+            // 2. Iniciar o processo de leitura (liga a câmera)
+            Quagga.start();
+            resultadoElement.textContent = 'Câmera ligada. Aponte para o código...';
+        }
+
+        // Evento disparado quando um código é detectado com sucesso
+        Quagga.onDetected(function(data) {
+            // 1. Parar a câmera e a leitura
+            Quagga.stop(); 
+            
+            const codigoLido = data.codeResult.code;
+            resultadoElement.textContent = 'Código lido: ' + codigoLido;
+            
+            // 2. Ocultar o vídeo e reativar o botão
+            interactiveDiv.style.display = 'none';
+            btnIniciar.textContent = 'Iniciar Nova Leitura';
+            btnIniciar.disabled = false;
+        });
+
+        // Inicializa o QuaggaJS quando a página carrega, mas não liga a câmera
+        document.addEventListener('DOMContentLoaded', initQuagga);
+    </script>
+</body>
+</html>
