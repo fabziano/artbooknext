@@ -1,29 +1,51 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <title>Leitor QR Code - GitHub Pages</title>
+    <title>Leitor QR Code com Controle</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { text-align: center; font-family: sans-serif; }
+        body { 
+            text-align: center; 
+            font-family: sans-serif; 
+            margin: 0; 
+            padding: 0;
+            width: 100%; 
+        }
+        
+        /* Container do Preview */
         #video-container {
             width: 90%; 
-            max-width: 400px;
+            max-width: 400px; 
             margin: 10px auto;
             position: relative;
             display: none; 
-            border: 2px solid #000; 
+            border: 2px solid #000;
         }
+        
         #video-container video {
             width: 100%;
-            height: 400;
+            height: auto; 
             display: block; 
         }
+        
         #canvas { display: none; } 
-        #btn-iniciar {
+        
+        #controles {
+            margin-top: 10px;
+        }
+
+        #btn-iniciar, #btn-desligar {
             padding: 10px 20px;
             font-size: 16px;
-            margin-bottom: 20px;
+            margin: 5px;
+        }
+        
+        #btn-desligar {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
     </style>
     
@@ -32,7 +54,10 @@
 <body>
     <h1>Leitor de QR Code</h1>
     
-    <button id="btn-iniciar" onclick="iniciarScanner()">Iniciar Leitura</button>
+    <div id="controles">
+        <button id="btn-iniciar" onclick="iniciarScanner()">Iniciar Leitura</button>
+        <button id="btn-desligar" onclick="pararScannerManual()" disabled>Desligar Câmera</button>
+    </div>
     
     <div id="video-container">
         <video id="video" playsinline></video>
@@ -48,10 +73,12 @@
         const canvas = canvasElement.getContext('2d');
         const resultadoElement = document.getElementById('resultado');
         const btnIniciar = document.getElementById('btn-iniciar');
+        const btnDesligar = document.getElementById('btn-desligar');
         const videoContainer = document.getElementById('video-container');
 
         let animationFrameId = null;
         let isScanning = false;
+        let videoTrack = null;
 
         function desenharBorda(localizacao, cor) {
             canvas.strokeStyle = cor;
@@ -64,9 +91,33 @@
             canvas.lineTo(localizacao.topLeftCorner.x, localizacao.topLeftCorner.y);
             canvas.stroke();
         }
+        
+        function toggleFlash(state) {
+            if (!videoTrack) return;
+
+            const capabilities = videoTrack.getCapabilities();
+
+            if (!capabilities.torch) {
+                console.warn('Controle de Flash (Torch) não suportado.');
+                return;
+            }
+
+            videoTrack.applyConstraints({
+                advanced: [{
+                    torch: state 
+                }]
+            })
+            .then(() => {
+                console.log('Flash configurado para: ' + state);
+            })
+            .catch(err => {
+                console.error('Erro ao controlar o Flash:', err);
+            });
+        }
+
 
         function tick() {
-            if (!isScanning) return; 
+            if (!isScanning) return;
 
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 canvasElement.height = video.videoHeight;
@@ -106,14 +157,19 @@
             
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(function(stream) {
+                    videoTrack = stream.getVideoTracks()[0];
+                    
                     video.srcObject = stream;
                     video.setAttribute("playsinline", true);
                     
                     video.onloadedmetadata = function() {
                         video.play();
                         
+                        toggleFlash(true); 
+                        
                         videoContainer.style.display = 'block';
-                        btnIniciar.textContent = 'Aguardando QR Code...';
+                        btnIniciar.style.display = 'none';
+                        btnDesligar.disabled = false;
                         resultadoElement.textContent = 'Aponte a câmera traseira para um QR Code.';
                         
                         isScanning = true;
@@ -136,6 +192,8 @@
         }
 
         function pararScanner(codigoLido) {
+            toggleFlash(false); 
+            
             isScanning = false;
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
@@ -146,11 +204,19 @@
             }
 
             videoContainer.style.display = 'none';
+            btnIniciar.style.display = 'inline-block';
             btnIniciar.textContent = 'Iniciar Nova Leitura';
-            btnIniciar.disabled = false;
+            btnDesligar.disabled = true;
             
             alert('Código Lido: ' + codigoLido);
+            videoTrack = null;
         }
+        
+        function pararScannerManual() {
+            pararScanner('Câmera Desligada Manualmente.');
+            resultadoElement.textContent = 'Pronto para escanear.';
+        }
+
 
         document.addEventListener('DOMContentLoaded', () => {
              btnIniciar.textContent = 'Iniciar Leitura';
