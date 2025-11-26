@@ -1,0 +1,144 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1B2838;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  padding: 1em;
+}
+
+section,
+article {
+  margin: 0.8em;
+  display: flex;
+  gap: 1em;
+}
+
+article input {
+  text-align: center;
+  font-size: 1.1em;
+}
+
+article button {
+  width: 8em;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  background-color: linear-gradient(90deg, #06BFFF 0%, #2D73FF 100%);
+  background-image: linear-gradient(90deg, rgb(6, 191, 255) 0%, rgb(45, 115, 255) 100%);
+  padding: 0.7em;
+  text-align: center;
+  vertical-align: middle;
+  border-radius: 0.5em;
+  font-weight: 600;
+}
+
+article button:hover {
+  background-color: linear-gradient(90deg, #2D73FF 0%, #06BFFF 100%);
+  background-image: linear-gradient(90deg, rgb(6, 191, 255) 20%, rgb(45, 115, 255) 100%);
+}
+
+section button {
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  background-color: #5f8311;
+  padding: 0.7em;
+  text-align: center;
+  vertical-align: middle;
+  border-radius: 0.5em;
+  font-weight: 600;
+}
+
+section button:hover {
+  background-color: #52710f;
+}
+
+section input {
+  text-align: center;
+  font-size: 1.1em;
+}
+
+#jogo {
+  background-color: transparent;
+  width: 640px;
+  height: 480px;
+  overflow: hidden;
+  position: relative;
+}
+
+#jogo.gradiente {
+  mask-image: linear-gradient(90deg, transparent 0%, black 58%);
+}
+
+#capaJogo {
+  position: absolute;
+  margin-left: 21.8em;
+  z-index: 3;
+  overflow: hidden;
+  transform: skewX(-5.9deg);
+  border: solid black;
+  background-color: #fff;
+  border-width: 0 0.4em 0 0.4em;
+  width: 262px;
+  height: 480px;
+  display: flex;
+  justify-content: center;
+}
+
+#capaJogo img {
+  transform: skewX(5.9deg);
+  margin-right: 6em;
+  cursor: move;
+  position: relative;
+  z-index: 3;
+}
+
+#logoJogo {
+  position: absolute;
+  margin-top: 12.5em;
+  margin-left: 24.4em;
+  z-index: 4;
+}
+
+#logoJogo img {
+  cursor: move;
+}
+
+#backgroundJogo {
+  position: absolute;
+  width: 640px;
+  height: 480px;
+  filter: blur(4px);
+  z-index: 1;
+  cursor: move;
+}
+
+#backgroundJogo img {
+  transform: scale(2.2);
+}
+
+#gradientOverlay {
+  position: absolute;
+  opacity: 0.6;
+  width: 640px;
+  height: 480px;
+  background-color: #000;
+  z-index: 2;
+  display: none;
+  pointer-events: none;
+}

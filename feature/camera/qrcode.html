@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de QR Code</title>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 400px;
+            font-size: 16px;
+        }
+        #qrcode {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="textoInput" placeholder="Digite o RA" onkeyup="gerarQRCode()">
+
+    <div id="qrcode"></div>
+
+    <script>
+        const qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: "Digite algo acima", 
+            width: 128,
+            height: 128,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        function gerarQRCode() {
+            const texto = document.getElementById("textoInput").value;
+            
+            if (texto.trim() === "") {
+                qrcode.makeCode("Digite o que deseja transformar em QR Code");
+            } else {
+                qrcode.makeCode(texto);
+            }
+        }
+
+        window.onload = gerarQRCode;
+    </script>
+
+</body>
+</html>
