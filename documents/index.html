@@ -1,1 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Documentos</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><path fill='%230070f0' d='M40 12H22l-4-4H8c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h32c2.2 0 4-1.8 4-4V16c0-2.2-1.8-4-4-4z'/></svg>">
+    <style>
+        html {
+            background: #181c25;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, sans-serif;
+            contain: layout paint;
+            user-select: none;
+            color: #fff;
+        }
+
+        span {
+            font-size: .8rem;
+            color: #888d9c;
+        }
+
+        a,
+        summary,label {
+            all: unset;
+            display: flex;
+            padding-left: 1rem;
+            cursor: default;
+            align-items: center;
+            gap: .5rem;
+            min-height: 4.35rem;
+            border-bottom: 1px solid #282f3d;
+            font: inherit;
+            content-visibility: auto;
+            contain-intrinsic-size: 0 4rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        svg {
+            flex-shrink: 0;
+            width: 4rem;
+            height: 4rem;
+        }
+      input[type="date"]{display:none}
+    </style>
+</head>
+
+<body>
+    <svg style="display: none">
+        <symbol id="folder" viewBox="0 0 48 48">
+            <path fill="#0070f0"
+                d="M40 12H22l-4-4H8c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h32c2.2 0 4-1.8 4-4V16c0-2.2-1.8-4-4-4z"></path>
+        </symbol>
+        <symbol id="link" viewBox="0 0 48 48">
+            <path fill="none" stroke="#0070f0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                d="M34 24v10H14V14h10 M24 24l14-14 M30 10h8v8"></path>
+        </symbol>
+    </svg>
+    <main>      
+        <details>
+            <summary>
+                <svg>
+                    <use href="#folder"></use>
+                </svg>
+                <div class="info">
+                    <p>Acesso rápido</p>
+                    <span>Links frequentes.</span>
+                </div>
+            </summary>
+          	<input type="date" id="calendario" min="2026-01-01" max="2026-12-31">
+            <label onclick="document.getElementById('calendario').showPicker()">
+              <svg>
+                <use href="#link"></use>
+              </svg>
+              Calendário
+            </label>
+            <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">
+                <svg>
+                    <use href="#link"></use>
+                </svg>
+                WhatsApp
+            </a>
+            <a href="https://drive.google.com/">
+                <svg>
+                    <use href="#link"></use>
+                </svg>
+                Drive
+            </a>
+            <a href="https://gemini.google.com/">
+                <svg>
+                    <use href="#link"></use>
+                </svg>
+                Gemini
+            </a>
+        </details>
+
+        <details>
+            <summary>
+                <svg>
+                    <use href="#folder"></use>
+                </svg>
+                <div class="info">
+                    <p>Uniamérica</p>
+                    <span>Plataformas da faculdade.</span>
+                </div>
+            </summary>
+            <a href="https://jacad.uniamerica.br/academico/aluno-v2/login">
+                <svg>
+                    <use href="#link"></use>
+                </svg>
+                JACAD
+            </a>
+            <a href="https://uniamerica.blackboard.com/ultra/course">
+                <svg>
+                    <use href="#link"></use>
+                </svg>
+                Blackboard
+            </a>
+            <a href="https://uniamerica.br/docs/calendarios-academicos/calendario-academico-2026-campus-boulevard.pdf" target="_blank" rel="noopener noreferrer">
+                <svg>
+                    <use href="#link"></use>
+                </svg>
+                Calendário Acadêmico
+            </a>
+        </details>
+    </main>
+</body>
+
+</html>
