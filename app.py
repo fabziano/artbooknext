@@ -39,6 +39,8 @@ f_ano = st.sidebar.multiselect("ANO", options=dim_tempo['ANO'].unique())
 f_regiao = st.sidebar.multiselect("REGIÃO", options=dim_localidade['REGIAO'].unique().categories)
 f_uf = st.sidebar.multiselect("UF", options=dim_localidade['UF'].unique().categories)
 
+st.sidebar.caption("Nota: Até 2006 inclui vendas + consumo próprio; a partir de 2007 inclui apenas vendas.")
+
 df_view = fato.merge(dim_localidade, on='IBGE')
 total_absoluto_arquivo = fato['VENDAS_CORRECAO'].sum()
 
@@ -125,10 +127,13 @@ elif pagina == "Participação Regional":
     df_reg_total['TOTAL_ANO'] = df_reg_total.groupby('ANO')['VENDAS_CORRECAO'].transform('sum')
     df_reg_total['PERCENTUAL'] = df_reg_total['VENDAS_CORRECAO'] / df_reg_total['TOTAL_ANO']
 
+    linha_2007 = alt.Chart(pd.DataFrame({'ANO': [2007]})).mark_rule(color='red', strokeDash=[4, 4]).encode(x='ANO:O')
+
     chart_area = alt.Chart(df_reg_total).mark_area().encode(
         x=alt.X('ANO:O', title='Ano'),
         y=alt.Y('PERCENTUAL:Q', stack='normalize', title='Participação (%)', axis=alt.Axis(format='.0%')),
         color=alt.Color('REGIAO:N', title='Região'),
         tooltip=['ANO', 'REGIAO', alt.Tooltip('PERCENTUAL', format='.2%')]
     ).properties(height=600)
-    st.altair_chart(chart_area, use_container_width=True)
+    
+    st.altair_chart(chart_area + linha_2007, use_container_width=True)
