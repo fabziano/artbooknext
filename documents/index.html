@@ -3,12 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Início</title>
+    <title>Faculdade</title>
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><path fill='%230070f0' d='M40 12H22l-4-4H8c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h32c2.2 0 4-1.8 4-4V16c0-2.2-1.8-4-4-4z'/></svg>">
-    <link rel="stylesheet" href="style.css">
-    <script src="layout.js" defer></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{background:#181c25}
+        body{width:100%;min-height:100dvh;display:flex;flex-direction:column;font-family:system-ui,sans-serif;color:#fff}
+        header{display:flex;align-items:center;justify-content:center;padding:0 1rem;background:#181c25;border-bottom:1px solid #282f3d;position:sticky;top:0;z-index:1000;min-height:4.35rem}
+        nav{display:flex;gap:1.5rem}
+        nav a{text-decoration:none;color:#fff;font-size:0.9rem;font-weight:500;-webkit-tap-highlight-color:transparent;padding:0.5rem 0;border-bottom:2px solid transparent;transition:border-color 0.2s}
+        nav a.active{border-bottom-color:#0070f0}
+        main{flex:1;width:100%}
+        main a, main summary{all:unset;display:flex;padding-left:1rem;cursor:pointer;align-items:center;gap:.5rem;min-height:4.35rem;border-bottom:1px solid #282f3d;font:inherit;-webkit-tap-highlight-color:transparent}
+        main svg{flex-shrink:0;width:4rem!important;height:4rem!important}
+        p{margin:0}
+        span{font-size:.8rem;color:#888d9c;display:block}
+    </style>
 </head>
 
 <body>
@@ -18,9 +29,6 @@
                 d="M40 12H22l-4-4H8c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h32c2.2 0 4-1.8 4-4V16c0-2.2-1.8-4-4-4z"></path>
         </symbol>
     </svg>
-
-    <app-layout></app-layout>
-
     <main>
         <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">
             <svg>
@@ -47,6 +55,35 @@
             <div class="info">
                 <p>Gemini</p>
                 <span>IA generativa.</span>
+            </div>
+        </a>
+        <a href="https://jacad.uniamerica.br/academico/aluno-v2/login" rel="noopener noreferrer" target="_blank">
+            <svg>
+                <use href="#folder"></use>
+            </svg>
+            <div class="info">
+                <p>JACAD</p>
+                <span>Portal do Aluno.</span>
+            </div>
+        </a>
+        <a href="https://uniamerica.blackboard.com/ultra/course" rel="noopener noreferrer" target="_blank">
+            <svg>
+                <use href="#folder"></use>
+            </svg>
+
+            <div class="info">
+                <p>Blackboard</p>
+                <span>Conteúdos das matérias.</span>
+            </div>
+        </a>
+        <a href="https://uniamerica.br/docs/calendarios-academicos/calendario-academico-2026-campus-boulevard.pdf"
+            target="_blank" rel="noopener noreferrer">
+            <svg>
+                <use href="#folder"></use>
+            </svg>
+            <div class="info">
+                <p>Calendário Acadêmico</p>
+                <span>Datas da Faculdade.</span>
             </div>
         </a>
     </main>
