@@ -14,4 +14,4 @@ class AppLayout extends HTMLElement {
         this.remove();
     }
 }
-customElements.define('layout', AppLayout);
+customElements.define('app-layout', AppLayout);
